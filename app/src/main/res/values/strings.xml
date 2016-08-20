@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Florianopolis Routes</string>
+
+    <string name="backend_api_base_url">https://api.appglu.com</string>
+    <string name="backend_api_username">WKD4N7YMA1uiM8V</string>
+    <string name="backend_api_password">DtdTtzMLQlA0hk2C1Yi5pLyVIlAQ68</string>
+</resources>
