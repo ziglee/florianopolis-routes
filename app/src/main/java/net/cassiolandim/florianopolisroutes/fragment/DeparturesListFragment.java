@@ -1,14 +1,13 @@
 package net.cassiolandim.florianopolisroutes.fragment;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,7 +17,10 @@ import net.cassiolandim.florianopolisroutes.backend.BackendApiClient;
 import net.cassiolandim.florianopolisroutes.model.RestApiFindDeparturesResponse;
 import net.cassiolandim.florianopolisroutes.model.DepartureListItem;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,7 +29,8 @@ import retrofit2.Response;
 public class DeparturesListFragment extends ParentFragment {
 
     private long routeId;
-    private ListView mListView;
+    private RecyclerView mListView;
+    private RecyclerView.LayoutManager mLayoutManager;
     private ProgressBar mLoadingSpinner;
 
     public static DeparturesListFragment newInstance(long routeId) {
@@ -51,8 +54,9 @@ public class DeparturesListFragment extends ParentFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_departures_list, container, false);
-        this.mListView = (ListView) rootView.findViewById(android.R.id.list);
+        this.mListView = (RecyclerView) rootView.findViewById(android.R.id.list);
         this.mLoadingSpinner = (ProgressBar) rootView.findViewById(android.R.id.progress);
+        this.mLayoutManager = new LinearLayoutManager(DeparturesListFragment.this.getContext());
         return rootView;
     }
 
@@ -77,7 +81,26 @@ public class DeparturesListFragment extends ParentFragment {
                     return;
                 }
 
-                DepartureListAdapter adapter = new DepartureListAdapter(DeparturesListFragment.this.getContext(), decodedResponse.rows);
+                Map<String, List<String>> map = new HashMap<>();
+                for (DepartureListItem item : decodedResponse.rows) {
+                    List<String> calendar = map.get(item.calendar);
+                    if (calendar == null) {
+                        calendar = new ArrayList<>();
+                        map.put(item.calendar, calendar);
+                    }
+                    calendar.add(item.time);
+                }
+
+                List<ListItem> list = new ArrayList<>();
+                for (String key : map.keySet()) {
+                    list.add(new ListItem(key, DepartureListAdapter.HEADER_VIEW));
+                    for (String content : map.get(key)) {
+                        list.add(new ListItem(content, DepartureListAdapter.REGULAR_VIEW));
+                    }
+                }
+
+                DepartureListAdapter adapter = new DepartureListAdapter(list);
+                mListView.setLayoutManager(mLayoutManager);
                 mListView.setAdapter(adapter);
 
                 mLoadingSpinner.setVisibility(View.GONE);
@@ -98,44 +121,95 @@ public class DeparturesListFragment extends ParentFragment {
                 buildRequestBody("routeId", String.valueOf(routeId)));
     }
 
-    private static class DepartureListAdapter extends BaseAdapter {
+    private static class DepartureListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
 
-        Context context;
-        List<DepartureListItem> items;
+        public static final int HEADER_VIEW = 0;
+        public static final int REGULAR_VIEW = 1;
 
-        public DepartureListAdapter(Context context, List<DepartureListItem> items) {
-            this.context = context;
-            this.items = items;
+        private List<ListItem> list;
+
+        public DepartureListAdapter(List<ListItem> list) {
+            this.list = list;
         }
 
         @Override
-        public int getCount() {
-            return items.size();
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View v;
+
+            if (viewType == HEADER_VIEW) {
+                v = LayoutInflater.from(parent.getContext()).inflate(R.layout.departure_list_header, parent, false);
+                HeaderViewHolder vh = new HeaderViewHolder(v);
+                return vh;
+
+            } else {
+                v = LayoutInflater.from(parent.getContext()).inflate(R.layout.departure_list_item, parent, false);
+                ItemViewHolder vh = new ItemViewHolder(v);
+                return vh;
+            }
         }
 
         @Override
-        public Object getItem(int position) {
-            return items.get(position);
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            try {
+                if (holder instanceof HeaderViewHolder) {
+                    HeaderViewHolder vh = (HeaderViewHolder) holder;
+                    vh.bindView(position);
+                } else if (holder instanceof ItemViewHolder) {
+                    ItemViewHolder vh = (ItemViewHolder) holder;
+                    vh.bindView(position);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
-        public long getItemId(int position) {
-            DepartureListItem item = (DepartureListItem) getItem(position);
-            return item.id;
+        public int getItemCount() {
+            return list.size();
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(context).inflate(R.layout.departure_list_item, parent, false);
+        public int getItemViewType(int position) {
+            return list.get(position).type;
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+
+            private TextView nameView;
+
+            public ViewHolder(final View itemView) {
+                super(itemView);
+                nameView = (TextView) itemView.findViewById(R.id.name);
             }
 
-            TextView name = (TextView) convertView.findViewById(R.id.name);
+            public void bindView(int position) {
+                nameView.setText(list.get(position).content);
+            }
+        }
 
-            DepartureListItem item = (DepartureListItem) getItem(position);
-            name.setText(item.time);
+        public class HeaderViewHolder extends ViewHolder {
 
-            return convertView;
+            public HeaderViewHolder(final View itemView) {
+                super(itemView);
+            }
+        }
+
+        public class ItemViewHolder extends ViewHolder {
+
+            public ItemViewHolder(final View itemView) {
+                super(itemView);
+            }
+        }
+    }
+
+    private static class ListItem {
+
+        public String content;
+        public int type;
+
+        public ListItem(String content, int type) {
+            this.content = content;
+            this.type = type;
         }
     }
 }
