@@ -2,7 +2,7 @@ package net.cassiolandim.florianopolisroutes.model;
 
 import java.util.Date;
 
-public class FindRouteListItem {
+public class RouteListItem {
 
     public long id;
     public String shortName;

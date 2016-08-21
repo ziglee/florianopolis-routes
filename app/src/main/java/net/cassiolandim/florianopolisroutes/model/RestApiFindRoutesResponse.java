@@ -2,9 +2,9 @@ package net.cassiolandim.florianopolisroutes.model;
 
 import java.util.List;
 
-public class RestApiFindRouteResponse {
+public class RestApiFindRoutesResponse {
 
     public int rowsAffected;
-    public List<FindRouteListItem> rows;
+    public List<RouteListItem> rows;
 
 }

@@ -1,21 +1,17 @@
 package net.cassiolandim.florianopolisroutes.activity;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -24,34 +20,23 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import net.cassiolandim.florianopolisroutes.backend.BackendApiClient;
-import net.cassiolandim.florianopolisroutes.backend.BackendApiUtil;
 import net.cassiolandim.florianopolisroutes.R;
-import net.cassiolandim.florianopolisroutes.model.FindRouteListItem;
-import net.cassiolandim.florianopolisroutes.model.RestApiFindRouteRequest;
-import net.cassiolandim.florianopolisroutes.model.RestApiFindRouteResponse;
+import net.cassiolandim.florianopolisroutes.model.RouteListItem;
+import net.cassiolandim.florianopolisroutes.model.RestApiRequest;
+import net.cassiolandim.florianopolisroutes.model.RestApiFindRoutesResponse;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
-public class ListActivity extends AppCompatActivity {
+public class ListActivity extends ParentActivity {
 
     private ListView mListView;
     private ProgressBar mLoadingSpinner;
-
-    private final OkHttpClient okHttpClient = new OkHttpClient.Builder()
-            .readTimeout(2, TimeUnit.MINUTES)
-            .writeTimeout(2, TimeUnit.MINUTES)
-            .connectTimeout(2, TimeUnit.MINUTES).build();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +52,11 @@ public class ListActivity extends AppCompatActivity {
 
         final AdapterView.OnItemClickListener mMessageClickedHandler = new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView parent, View v, int position, long id) {
-                // TODO
+                RouteListItem item = (RouteListItem) parent.getAdapter().getItem(position);
+                Intent intent = new Intent(ListActivity.this, DetailsActivity.class);
+                intent.putExtra(DetailsActivity.EXTRAS_ID, item.id);
+                intent.putExtra(DetailsActivity.EXTRAS_NAME, item.longName);
+                startActivity(intent);
             }
         };
 
@@ -83,14 +72,14 @@ public class ListActivity extends AppCompatActivity {
     }
 
     private void doSearch(final String streetName) {
-        Call<RestApiFindRouteResponse> call = buildFindRoutesByStopNameCall(streetName);
+        Call<RestApiFindRoutesResponse> call = buildFindRoutesByStopNameCall(streetName);
 
         mLoadingSpinner.setVisibility(View.VISIBLE);
         mListView.setVisibility(View.GONE);
 
-        call.enqueue(new Callback<RestApiFindRouteResponse>() {
+        call.enqueue(new Callback<RestApiFindRoutesResponse>() {
             @Override
-            public void onResponse(Call<RestApiFindRouteResponse> call, Response<RestApiFindRouteResponse> response) {
+            public void onResponse(Call<RestApiFindRoutesResponse> call, Response<RestApiFindRoutesResponse> response) {
                 if (!response.isSuccessful()) {
                     mLoadingSpinner.setVisibility(View.GONE);
                     mListView.setVisibility(View.VISIBLE);
@@ -98,7 +87,7 @@ public class ListActivity extends AppCompatActivity {
                     return;
                 }
 
-                RestApiFindRouteResponse decodedResponse = response.body();
+                RestApiFindRoutesResponse decodedResponse = response.body();
                 if (decodedResponse == null) {
                     mLoadingSpinner.setVisibility(View.GONE);
                     mListView.setVisibility(View.VISIBLE);
@@ -113,7 +102,7 @@ public class ListActivity extends AppCompatActivity {
                 mListView.setVisibility(View.VISIBLE);
             }
 
-            public void onFailure(Call<RestApiFindRouteResponse> call, Throwable t) {
+            public void onFailure(Call<RestApiFindRoutesResponse> call, Throwable t) {
                 Log.w("findRoutesByStopName", streetName, t);
                 Snackbar.make(mListView, "Ocorreu um erro", Snackbar.LENGTH_SHORT).show();
 
@@ -123,32 +112,24 @@ public class ListActivity extends AppCompatActivity {
         });
     }
 
-    private Call<RestApiFindRouteResponse> buildFindRoutesByStopNameCall(String streetName) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(getString(R.string.backend_api_base_url))
-                .client(okHttpClient)
-                .build();
+    private Call<RestApiFindRoutesResponse> buildFindRoutesByStopNameCall(String streetName) {
+        BackendApiClient apiClient = buildBackendApiClient();
+        String authorization = buildAuthorizationString();
 
-        String username = getString(R.string.backend_api_username);
-        String password = getString(R.string.backend_api_password);
-        String authorization = BackendApiUtil.authorizationHeaderValue(username, password);
-
-        RestApiFindRouteRequest params = new RestApiFindRouteRequest("stopName", "%" + streetName + "%");
+        RestApiRequest params = new RestApiRequest("stopName", "%" + streetName + "%");
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
 
         RequestBody reqBody = RequestBody.create(MediaType.parse("application/json"), gson.toJson(params));
-        BackendApiClient apiClient = retrofit.create(BackendApiClient.class);
         return apiClient.findRoutesByStopName(authorization, "staging", reqBody);
     }
 
     private static class RouteListAdapter extends BaseAdapter {
 
         Context context;
-        List<FindRouteListItem> items;
+        List<RouteListItem> items;
 
-        public RouteListAdapter(Context context, List<FindRouteListItem> items) {
+        public RouteListAdapter(Context context, List<RouteListItem> items) {
             this.context = context;
             this.items = items;
         }
@@ -165,7 +146,7 @@ public class ListActivity extends AppCompatActivity {
 
         @Override
         public long getItemId(int position) {
-            FindRouteListItem item = (FindRouteListItem) getItem(position);
+            RouteListItem item = (RouteListItem) getItem(position);
             return item.id;
         }
 
@@ -178,7 +159,7 @@ public class ListActivity extends AppCompatActivity {
             TextView shortName = (TextView) convertView.findViewById(R.id.short_name);
             TextView longName = (TextView) convertView.findViewById(R.id.long_name);
 
-            FindRouteListItem item = (FindRouteListItem) getItem(position);
+            RouteListItem item = (RouteListItem) getItem(position);
             shortName.setText(item.shortName);
             longName.setText(item.longName);
 
