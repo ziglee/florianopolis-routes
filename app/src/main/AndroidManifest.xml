@@ -20,6 +20,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.DetailsActivity"
+            android:parentActivityName=".activity.ListActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

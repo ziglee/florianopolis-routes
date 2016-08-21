@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 
 import net.cassiolandim.florianopolisroutes.R;
@@ -37,7 +38,9 @@ public class DetailsActivity extends ParentActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        getSupportActionBar().setTitle(routeName);
+        ActionBar ab = getSupportActionBar();
+        ab.setTitle(routeName);
+        ab.setDisplayHomeAsUpEnabled(true);
 
         String[] titles = {getString(R.string.tab_title_departures),
                 getString(R.string.tab_title_stops)};
