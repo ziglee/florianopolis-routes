@@ -1,4 +1,4 @@
-package net.cassiolandim.florianopolisroutes;
+package net.cassiolandim.florianopolisroutes.backend;
 
 import net.cassiolandim.florianopolisroutes.model.RestApiFindRouteResponse;
 

@@ -1,5 +1,7 @@
 package net.cassiolandim.florianopolisroutes;
 
+import net.cassiolandim.florianopolisroutes.backend.BackendApiUtil;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
