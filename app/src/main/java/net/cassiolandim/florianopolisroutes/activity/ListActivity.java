@@ -7,6 +7,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -35,6 +37,9 @@ import retrofit2.Response;
 
 public class ListActivity extends ParentActivity {
 
+    public static final int PICK_STREET_NAME = 0;
+
+    private EditText mStreetNameEditText;
     private ListView mListView;
     private ProgressBar mLoadingSpinner;
 
@@ -47,6 +52,7 @@ public class ListActivity extends ParentActivity {
 
         mLoadingSpinner = (ProgressBar) findViewById(R.id.loading_spinner);
         mListView = (ListView) findViewById(R.id.list_view);
+        mStreetNameEditText = (EditText) findViewById(R.id.street_name);
 
         mLoadingSpinner.setVisibility(View.GONE);
 
@@ -65,10 +71,39 @@ public class ListActivity extends ParentActivity {
         findViewById(R.id.search_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText editText = (EditText) findViewById(R.id.street_name);
-                doSearch(editText.getText().toString());
+                doSearch(mStreetNameEditText.getText().toString());
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_map) {
+            Intent intent = new Intent(ListActivity.this, MapsActivity.class);
+            startActivityForResult(intent, PICK_STREET_NAME);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PICK_STREET_NAME) {
+            if (resultCode == RESULT_OK) {
+                String streetName = data.getStringExtra(MapsActivity.EXTRA_STREET_NAME);
+                mStreetNameEditText.setText(streetName);
+                doSearch(streetName);
+            }
+        }
     }
 
     private void doSearch(final String streetName) {
