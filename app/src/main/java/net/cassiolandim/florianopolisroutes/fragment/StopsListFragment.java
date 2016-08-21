@@ -66,14 +66,14 @@ public class StopsListFragment extends ParentFragment {
             public void onResponse(Call<RestApiFindStopsResponse> call, Response<RestApiFindStopsResponse> response) {
                 if (!response.isSuccessful()) {
                     mLoadingSpinner.setVisibility(View.GONE);
-                    Toast.makeText(StopsListFragment.this.getContext(), "Ocorreu um erro", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(StopsListFragment.this.getContext(), R.string.toast_error, Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 RestApiFindStopsResponse decodedResponse = response.body();
                 if (decodedResponse == null) {
                     mLoadingSpinner.setVisibility(View.GONE);
-                    Toast.makeText(StopsListFragment.this.getContext(), "Ocorreu um erro", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(StopsListFragment.this.getContext(), R.string.toast_error, Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -86,7 +86,7 @@ public class StopsListFragment extends ParentFragment {
 
             public void onFailure(Call<RestApiFindStopsResponse> call, Throwable t) {
                 Log.w("findStopsByRouteId", String.valueOf(routeId), t);
-                Toast.makeText(StopsListFragment.this.getContext(), "Ocorreu um erro", Toast.LENGTH_SHORT).show();
+                Toast.makeText(StopsListFragment.this.getContext(), R.string.toast_error, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -94,7 +94,7 @@ public class StopsListFragment extends ParentFragment {
     private Call<RestApiFindStopsResponse> buildFindStopsByRouteIdCall(long routeId) {
         BackendApiClient apiClient = buildBackendApiClient();
         return apiClient.findStopsByRouteId(buildAuthorizationString(),
-                "staging",
+                getString(R.string.backend_api_environment),
                 buildRequestBody("routeId", String.valueOf(routeId)));
     }
 

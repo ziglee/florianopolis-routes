@@ -70,14 +70,14 @@ public class DeparturesListFragment extends ParentFragment {
             public void onResponse(Call<RestApiFindDeparturesResponse> call, Response<RestApiFindDeparturesResponse> response) {
                 if (!response.isSuccessful()) {
                     mLoadingSpinner.setVisibility(View.GONE);
-                    Toast.makeText(DeparturesListFragment.this.getContext(), "Ocorreu um erro", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DeparturesListFragment.this.getContext(), R.string.toast_error, Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 RestApiFindDeparturesResponse decodedResponse = response.body();
                 if (decodedResponse == null) {
                     mLoadingSpinner.setVisibility(View.GONE);
-                    Toast.makeText(DeparturesListFragment.this.getContext(), "Ocorreu um erro", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DeparturesListFragment.this.getContext(), R.string.toast_error, Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -109,7 +109,7 @@ public class DeparturesListFragment extends ParentFragment {
 
             public void onFailure(Call<RestApiFindDeparturesResponse> call, Throwable t) {
                 Log.w("findDeparturesByRouteId", String.valueOf(routeId), t);
-                Toast.makeText(DeparturesListFragment.this.getContext(), "Ocorreu um erro", Toast.LENGTH_SHORT).show();
+                Toast.makeText(DeparturesListFragment.this.getContext(), R.string.toast_error, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -117,7 +117,7 @@ public class DeparturesListFragment extends ParentFragment {
     private Call<RestApiFindDeparturesResponse> buildFindDeparturesByRouteIdCall(long routeId) {
         BackendApiClient apiClient = buildBackendApiClient();
         return apiClient.findDeparturesByRouteId(buildAuthorizationString(),
-                "staging",
+                getString(R.string.backend_api_environment),
                 buildRequestBody("routeId", String.valueOf(routeId)));
     }
 
@@ -140,7 +140,6 @@ public class DeparturesListFragment extends ParentFragment {
                 v = LayoutInflater.from(parent.getContext()).inflate(R.layout.departure_list_header, parent, false);
                 HeaderViewHolder vh = new HeaderViewHolder(v);
                 return vh;
-
             } else {
                 v = LayoutInflater.from(parent.getContext()).inflate(R.layout.departure_list_item, parent, false);
                 ItemViewHolder vh = new ItemViewHolder(v);

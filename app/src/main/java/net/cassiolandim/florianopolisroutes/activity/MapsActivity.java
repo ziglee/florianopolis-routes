@@ -114,7 +114,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 setResult(RESULT_OK, resultIntent);
                 finish();
             } else {
-                Toast.makeText(MapsActivity.this, "Ocorreu um erro.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MapsActivity.this, R.string.toast_error, Toast.LENGTH_SHORT).show();
             }
         }
     }

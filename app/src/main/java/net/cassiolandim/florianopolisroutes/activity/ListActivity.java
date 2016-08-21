@@ -118,7 +118,7 @@ public class ListActivity extends ParentActivity {
                 if (!response.isSuccessful()) {
                     mLoadingSpinner.setVisibility(View.GONE);
                     mListView.setVisibility(View.VISIBLE);
-                    Snackbar.make(mListView, "Ocorreu um erro", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(mListView, R.string.toast_error, Snackbar.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -126,7 +126,7 @@ public class ListActivity extends ParentActivity {
                 if (decodedResponse == null) {
                     mLoadingSpinner.setVisibility(View.GONE);
                     mListView.setVisibility(View.VISIBLE);
-                    Snackbar.make(mListView, "Ocorreu um erro", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(mListView, R.string.toast_error, Snackbar.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -139,7 +139,7 @@ public class ListActivity extends ParentActivity {
 
             public void onFailure(Call<RestApiFindRoutesResponse> call, Throwable t) {
                 Log.w("findRoutesByStopName", streetName, t);
-                Snackbar.make(mListView, "Ocorreu um erro", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(mListView, R.string.toast_error, Snackbar.LENGTH_SHORT).show();
 
                 mLoadingSpinner.setVisibility(View.GONE);
                 mListView.setVisibility(View.VISIBLE);
@@ -156,7 +156,7 @@ public class ListActivity extends ParentActivity {
         Gson gson = builder.create();
 
         RequestBody reqBody = RequestBody.create(MediaType.parse("application/json"), gson.toJson(params));
-        return apiClient.findRoutesByStopName(authorization, "staging", reqBody);
+        return apiClient.findRoutesByStopName(authorization, getString(R.string.backend_api_environment), reqBody);
     }
 
     private static class RouteListAdapter extends BaseAdapter {

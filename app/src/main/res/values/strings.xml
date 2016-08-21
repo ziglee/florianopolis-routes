@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Florianopolis Routes</string>
 
+    <string name="toast_error">An error ocurred.</string>
+
     <string name="action_map">Mapa</string>
 
     <string name="tab_title_departures">DEPARTURES</string>
@@ -11,5 +13,7 @@
     <string name="backend_api_base_url">https://api.appglu.com</string>
     <string name="backend_api_username">WKD4N7YMA1uiM8V</string>
     <string name="backend_api_password">DtdTtzMLQlA0hk2C1Yi5pLyVIlAQ68</string>
+    <string name="backend_api_environment">staging</string>
+
     <string name="title_activity_maps">Map</string>
 </resources>
