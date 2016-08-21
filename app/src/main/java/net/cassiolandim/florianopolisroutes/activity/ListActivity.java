@@ -54,8 +54,8 @@ public class ListActivity extends ParentActivity {
             public void onItemClick(AdapterView parent, View v, int position, long id) {
                 RouteListItem item = (RouteListItem) parent.getAdapter().getItem(position);
                 Intent intent = new Intent(ListActivity.this, DetailsActivity.class);
-                intent.putExtra(DetailsActivity.EXTRAS_ID, item.id);
-                intent.putExtra(DetailsActivity.EXTRAS_NAME, item.longName);
+                intent.putExtra(DetailsActivity.EXTRA_ID, item.id);
+                intent.putExtra(DetailsActivity.EXTRAS_NAME, item.shortName + " - " + item.longName);
                 startActivity(intent);
             }
         };
